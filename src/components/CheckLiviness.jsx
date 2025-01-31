@@ -42,7 +42,7 @@ const CheckLiveness = ({ image }) => {
         console.log("Verify FACE:", response.data);
 
         if (response.data.status === 200) {
-          setSimilarityScore(response.data.score);
+          setSimilarityScore(response.data.similarity);
         } else {
           setErrorMessage(response.data.message || "Something went wrong");
         }
