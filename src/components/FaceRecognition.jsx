@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import Webcam from "react-webcam";
 import * as faceapi from "face-api.js";
+import CheckLiveness from "./CheckLiviness";
+
 
 const FaceRecognition = () => {
-  const videoRef = useRef();
+  const webcamRef = useRef(null);
   const [recognitionPercentage, setRecognitionPercentage] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
   const [multipleFaces, setMultipleFaces] = useState(false);
@@ -13,38 +16,25 @@ const FaceRecognition = () => {
   useEffect(() => {
     const loadModels = async () => {
       try {
-        // Load the required models
         await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
-        await faceapi.nets.faceLandmark68Net.loadFromUri("/models"); // Optional but recommended
-        await faceapi.nets.faceRecognitionNet.loadFromUri("/models"); // Optional but recommended
+        await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+        await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
         console.log("Models loaded successfully");
       } catch (error) {
         console.error("Error loading models:", error);
       }
     };
 
-    const startVideo = () => {
-      navigator.mediaDevices
-        .getUserMedia({ video: {} })
-        .then((stream) => {
-          videoRef.current.srcObject = stream;
-          console.log("Video stream started:", stream);
-        })
-        .catch((err) => console.error("Error accessing camera:", err));
-    };
-
     const detectFaces = async () => {
-      if (!detectionRunning.current) return;
+      if (!detectionRunning.current || !webcamRef.current) return;
 
+      const video = webcamRef.current.video;
       const options =
         model === "TinyFaceDetector"
           ? new faceapi.TinyFaceDetectorOptions()
           : new faceapi.SsdMobilenetv1Options();
 
-      const detections = await faceapi.detectAllFaces(
-        videoRef.current,
-        options
-      );
+      const detections = await faceapi.detectAllFaces(video, options);
 
       if (detections.length > 1) {
         setMultipleFaces(true);
@@ -56,8 +46,8 @@ const FaceRecognition = () => {
 
         if (confidence > 95) {
           setFace(true);
-          // captureSnapshot();
-          // detectionRunning.current = false; // Stop detection after match
+          captureSnapshot();
+          detectionRunning.current = false; // Stop detection after match
         } else {
           setFace(false);
         }
@@ -70,30 +60,25 @@ const FaceRecognition = () => {
     };
 
     const captureSnapshot = () => {
-      const canvas = document.createElement("canvas");
-      const video = videoRef.current;
-
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      setSnapshot(canvas.toDataURL("image/png")); // Save snapshot
+      const imageSrc = webcamRef.current.getScreenshot();
+      setSnapshot(imageSrc); // Save snapshot
     };
 
     loadModels().then(() => {
-      startVideo();
-      videoRef.current.onplay = () => {
-        detectionRunning.current = true;
-        detectFaces();
-      };
+      detectionRunning.current = true;
+      detectFaces();
     });
+
+    return () => {
+      detectionRunning.current = false; // Stop detection when component unmounts
+    };
   }, [model]);
 
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-screen 
-      bg-gray-100 ${face ? "bg-green-500" : "bg-white"}`}
+      className={`flex flex-col items-center justify-center min-h-screen bg-gray-100 ${
+        face ? "bg-green-500" : "bg-white"
+      }`}
     >
       <h1 className="text-3xl font-bold mb-6">Face Detection App</h1>
       <div className="flex items-center">
@@ -104,12 +89,15 @@ const FaceRecognition = () => {
             className="w-48 h-48 rounded-lg shadow-lg mr-6"
           />
         )}
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          screenshotFormat="image/jpeg"
+          videoConstraints={{
+            facingMode: "user",
+          }}
           className="rounded-lg shadow-lg"
-        ></video>
+        />
       </div>
       {multipleFaces ? (
         <p className="mt-4 text-xl font-semibold text-red-600">
@@ -139,6 +127,9 @@ const FaceRecognition = () => {
           <option value="SsdMobilenetv1">SsdMobilenetv1</option>
         </select>
       </div>
+
+      <h1 className="mt-4">Checking Liveness</h1>
+      {snapshot && <CheckLiveness image={snapshot} />}
     </div>
   );
 };
