@@ -19,9 +19,6 @@ const CheckLiveness = ({ image }) => {
     }
   };
 
-  console.log("The profile image", profileImg);
-  console.log("The image to verify", image);
-
   useEffect(() => {
     const verifyFace = async () => {
       try {
