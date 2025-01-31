@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import * as faceapi from "face-api.js";
 import CheckLiveness from "./CheckLiviness";
-
 
 const FaceRecognition = () => {
   const webcamRef = useRef(null);
@@ -49,7 +48,7 @@ const FaceRecognition = () => {
           captureSnapshot();
           detectionRunning.current = false; // Stop detection after match
         } else {
-          setFace(false);
+          // setFace(false);
         }
       } else {
         setMultipleFaces(false);
@@ -81,7 +80,7 @@ const FaceRecognition = () => {
       }`}
     >
       <h1 className="text-3xl font-bold mb-6">Face Detection App</h1>
-      <div className="flex items-center">
+      <div className="items-center flex flex-col">
         {snapshot && (
           <img
             src={snapshot}

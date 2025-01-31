@@ -91,10 +91,10 @@ const CheckLiveness = ({ image }) => {
 
   return (
     <>
-      <div className="bg-gray-500">
-        <h1>You have to upload 1</h1>
+      <div className="bg-red-300 flex flex-col">
+        <h1>You have to upload 1 Image</h1>
         <input type="file" accept="image/*" onChange={handleImageUpload} />
-        {profileImg && <img src={profileImg} alt="Profile" className="my-4" />}
+        {/* {profileImg && <img src={profileImg} alt="Profile" className="my-4" />} */}
       </div>
 
       <div>
@@ -118,9 +118,18 @@ const CheckLiveness = ({ image }) => {
       {profileImg && (
         <div>
           <h1>Profile Image</h1>
-          <img src={profileImg} alt="Profile" />
+          <img
+            className="max-w-[400px] max-h-[400px]"
+            src={profileImg}
+            alt="Profile"
+          />
         </div>
       )}
+      <div className="bg-gray-200">
+        <h1>Images SENT :</h1>
+        {profileImg && <img src={profileImg} alt="Profile" className="my-4" />}
+        {profileImg && <img src={image} alt="Profile" className="my-4" />}
+      </div>
     </>
   );
 };
