@@ -83,54 +83,50 @@ const CheckLiveness = ({ image }) => {
       }
     };
 
-    if (profileImg && image) {
-      verifyFace();
+    if (image) {
+      // verifyFace();
       checkLiveness();
     }
-  }, [profileImg, image]); // Trigger when profileImg or image changes
+  }, [profileImg, image]);
 
   return (
-    <>
-      <div className="bg-red-300 flex flex-col">
-        <h1>You have to upload 1 Image</h1>
-        <input type="file" accept="image/*" onChange={handleImageUpload} />
-        {/* {profileImg && <img src={profileImg} alt="Profile" className="my-4" />} */}
-      </div>
-
-      <div>
+    <div className="p-6 bg-gray-100 min-h-screen flex flex-col items-center space-y-6">
+      <div className="w-full max-w-md bg-white p-4 rounded-lg shadow-md text-center">
         {livenessScore !== null && (
-          <p className="text-xl font-semibold">
+          <p className="text-xl font-semibold text-blue-600">
             Liveness Score: {livenessScore}
           </p>
         )}
-        {errorMessage && <p className="text-red-600">{errorMessage}</p>}
-      </div>
-
-      <div>
         {similarityScore !== null && (
-          <p className="text-xl font-semibold">
+          <p className="text-xl font-semibold text-green-600">
             Similarity Score: {similarityScore}
           </p>
         )}
-        {errorMessage && <p className="text-red-600">{errorMessage}</p>}
+        {errorMessage && <p className="text-red-600 mt-2">{errorMessage}</p>}
       </div>
 
       {profileImg && (
-        <div>
-          <h1>Profile Image</h1>
+        <div className="w-full max-w-md bg-white p-4 rounded-lg shadow-md text-center">
+          <h2 className="text-lg font-semibold text-gray-700">Profile Image</h2>
           <img
-            className="max-w-[400px] max-h-[400px]"
+            className="w-64 h-64 object-cover rounded-lg mx-auto mt-2 border border-gray-300"
             src={profileImg}
             alt="Profile"
           />
         </div>
       )}
-      <div className="bg-gray-200">
-        <h1>Images SENT :</h1>
-        {profileImg && <img src={profileImg} alt="Profile" className="my-4" />}
-        {profileImg && <img src={image} alt="Profile" className="my-4" />}
+
+      <div className="w-full max-w-md bg-white p-4 rounded-lg shadow-md text-center">
+        <h2 className="text-lg font-semibold text-gray-700">Images Sent</h2>
+        {profileImg && (
+          <img
+            className="w-64 h-64 object-cover rounded-lg mx-auto mt-2 border border-gray-300"
+            src={profileImg}
+            alt="Sent Profile"
+          />
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

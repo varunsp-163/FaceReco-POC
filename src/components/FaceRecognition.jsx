@@ -8,15 +8,16 @@ const FaceRecognition = () => {
   const [recognitionPercentage, setRecognitionPercentage] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
   const [multipleFaces, setMultipleFaces] = useState(false);
-  const [model, setModel] = useState("TinyFaceDetector"); // Default model
+  const [model, setModel] = useState("TinyFaceDetector");
   const detectionRunning = useRef(true);
   const [face, setFace] = useState(false);
 
   useEffect(() => {
     const loadModels = async () => {
       try {
-        await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
-        await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+        // await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+        // await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+        // await faceapi.nets.ssdMobilenetv1.loadFromUri("/models");
         await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
         console.log("Models loaded successfully");
       } catch (error) {
@@ -28,10 +29,7 @@ const FaceRecognition = () => {
       if (!detectionRunning.current || !webcamRef.current) return;
 
       const video = webcamRef.current.video;
-      const options =
-        model === "TinyFaceDetector"
-          ? new faceapi.TinyFaceDetectorOptions()
-          : new faceapi.SsdMobilenetv1Options();
+      const options = new faceapi.TinyFaceDetectorOptions();
 
       const detections = await faceapi.detectAllFaces(video, options);
 
@@ -43,12 +41,11 @@ const FaceRecognition = () => {
         const confidence = (detections[0].score * 100).toFixed(2);
         setRecognitionPercentage(confidence);
 
-        if (confidence > 95) {
+        if (confidence > 98) {
+          console.log("the confidence", confidence);
           setFace(true);
           captureSnapshot();
-          detectionRunning.current = false; // Stop detection after match
-        } else {
-          // setFace(false);
+          detectionRunning.current = false;
         }
       } else {
         setMultipleFaces(false);
@@ -60,7 +57,7 @@ const FaceRecognition = () => {
 
     const captureSnapshot = () => {
       const imageSrc = webcamRef.current.getScreenshot();
-      setSnapshot(imageSrc); // Save snapshot
+      setSnapshot(imageSrc);
     };
 
     loadModels().then(() => {
@@ -69,65 +66,41 @@ const FaceRecognition = () => {
     });
 
     return () => {
-      detectionRunning.current = false; // Stop detection when component unmounts
+      detectionRunning.current = false;
     };
   }, [model]);
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center min-h-screen bg-gray-100 ${
-        face ? "bg-green-500" : "bg-white"
-      }`}
-    >
-      <h1 className="text-3xl font-bold mb-6">Face Detection App</h1>
-      <div className="items-center flex flex-col">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+      <div className="bg-white shadow-lg rounded-lg p-6 max-w-md w-full text-center">
+        <h1 className="text-2xl font-bold mb-4">Face Recognition</h1>
         {snapshot && (
           <img
             src={snapshot}
             alt="Snapshot"
-            className="w-48 h-48 rounded-lg shadow-lg mr-6"
+            className="w-32 h-32 rounded-lg shadow-md mx-auto mb-4"
           />
         )}
         <Webcam
           audio={false}
           ref={webcamRef}
           screenshotFormat="image/jpeg"
-          videoConstraints={{
-            facingMode: "user",
-          }}
-          className="rounded-lg shadow-lg"
+          videoConstraints={{ facingMode: "user" }}
+          className="rounded-lg shadow-lg w-full"
         />
-      </div>
-      {multipleFaces ? (
-        <p className="mt-4 text-xl font-semibold text-red-600">
-          Multiple Faces Found
-        </p>
-      ) : recognitionPercentage ? (
-        <p className="mt-4 text-xl font-semibold">
-          Detection Confidence:{" "}
-          <span className="text-blue-600">{recognitionPercentage}%</span>
-        </p>
-      ) : (
-        <p className="mt-4 text-xl font-semibold text-gray-600">
-          No Face Detected
-        </p>
-      )}
-      <div className="mt-4">
-        <label htmlFor="model-select" className="mr-2">
-          Select Model:
-        </label>
-        <select
-          id="model-select"
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-          className="p-2 border rounded"
-        >
-          <option value="TinyFaceDetector">TinyFaceDetector</option>
-          <option value="SsdMobilenetv1">SsdMobilenetv1</option>
-        </select>
+        {multipleFaces ? (
+          <p className="mt-4 text-red-500 font-semibold">
+            Multiple Faces Found
+          </p>
+        ) : recognitionPercentage ? (
+          <p className="mt-4 text-blue-500 font-semibold">
+            Detection Confidence: {recognitionPercentage}%
+          </p>
+        ) : (
+          <p className="mt-4 text-gray-500">No Face Detected</p>
+        )}
       </div>
 
-      <h1 className="mt-4">Checking Liveness</h1>
       {snapshot && <CheckLiveness image={snapshot} />}
     </div>
   );
