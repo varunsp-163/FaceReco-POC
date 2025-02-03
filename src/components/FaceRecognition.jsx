@@ -86,7 +86,7 @@ const FaceRecognition = () => {
           ref={webcamRef}
           screenshotFormat="image/jpeg"
           videoConstraints={{ facingMode: "user" }}
-          className="rounded-lg shadow-lg w-full"
+          className="rounded-lg shadow-lg w-full transform scale-x-[-1]"
         />
         {multipleFaces ? (
           <p className="mt-4 text-red-500 font-semibold">
