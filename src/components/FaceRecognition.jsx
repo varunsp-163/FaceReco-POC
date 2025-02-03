@@ -8,7 +8,7 @@ const FaceRecognition = () => {
   const [recognitionPercentage, setRecognitionPercentage] = useState(null);
   const [snapshot, setSnapshot] = useState(null);
   const [multipleFaces, setMultipleFaces] = useState(false);
-  const [model, setModel] = useState("TinyFaceDetector");
+
   const detectionRunning = useRef(true);
   const [face, setFace] = useState(false);
 
@@ -68,7 +68,7 @@ const FaceRecognition = () => {
     return () => {
       detectionRunning.current = false;
     };
-  }, [model]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
